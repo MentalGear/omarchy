@@ -1,9 +1,19 @@
 #!/bin/bash
 
 if [ "$#" -ne 3 ]; then
-  echo -e "\e[32mLet's create a new web app you can start with the app launcher.\n\e[0m"
-  APP_NAME=$(gum input --prompt "Name> " --placeholder "My favorite web app")
+  echo -e "\e[32mLet's add a new web app you can start with the app launcher.\n\e[0m"
   APP_URL=$(gum input --prompt "URL> " --placeholder "https://example.com")
+  # Fetch the page title
+  PAGE_TITLE=$(curl -sL "$APP_URL" | grep -oP '(?<=<title>)(.*?)(?=</title>)' | head -n1)
+  # Extract only the first part before '-', ':', or '|', as websites often use these to separate title from site name or tagline
+  # For example, "Example Domain - An Example Site" becomes "Example Domain"
+  if [ -n "$PAGE_TITLE" ]; then
+    PAGE_TITLE_CLEAN=$(echo "$PAGE_TITLE" | sed 's/[-:|].*$//;s/ *$//')
+  else
+    PAGE_TITLE_CLEAN="Enter App Name"
+  fi
+
+  APP_NAME=$(gum input --prompt "Name> " --value "$PAGE_TITLE_CLEAN" --placeholder "Enter App Name")
   ICON_URL=$(gum input --prompt "Icon URL> " --placeholder "See https://dashboardicons.com (must use PNG!)")
 else
   APP_NAME="$1"
